@@ -2,34 +2,41 @@
 import { Html5Qrcode } from 'html5-qrcode';
 import { useEffect, useState } from 'react';
 import Select from 'react-select';
- 
+
 // QRコードリーダーの表示領域のhtmlのID
 const qrcodeRegionId = 'html5qr-code-full-region';
- 
+
+interface Camera {
+  value: string;
+  label: string;
+}
+
+interface QrcodeReaderProps {
+  onScanSuccess: (decodedText: string, decodedResult: unknown) => void;
+  onScanFailure: (error: string) => void;
+}
+
 export default function QrcodeReader({
   onScanSuccess,
   onScanFailure,
-}: {
-  onScanSuccess: any;
-  onScanFailure: any;
-}) {
+}: QrcodeReaderProps) {
   // QRコードリーダーの設定
   // fpsは読み取り頻度。デフォルトは　2.１秒間に何回読み取るかの値を設定。１ならば１秒間に１回読み取る。
   // qrboxは読み取り範囲の設定。widthとheightを設定する。
   const config = { fps: 1, qrbox: { width: 250, height: 250 } };
- 
+
   // カメラの許可
   const [cameraPermission, setCameraPermission] = useState(false);
- 
+
   // 選択したカメラID保存用
   const [selectedCameraId, setSelectedCameraId] = useState('');
- 
+
   // 使用できるカメラ一覧
-  const [cameras, setCameras] = useState<any>([]);
- 
+  const [cameras, setCameras] = useState<Camera[]>([]);
+
   // QRコードリーダーインスタンス
-  const [html5QrcodeScanner, setHtml5QrcodeScanner] = useState<any>(null);
- 
+  const [html5QrcodeScanner, setHtml5QrcodeScanner] = useState<Html5Qrcode | null>(null);
+
   // カメラ情報を取得するための関数
   const getCameras = async () => {
     await Html5Qrcode.getCameras()
@@ -48,9 +55,10 @@ export default function QrcodeReader({
         console.error(err);
       });
   };
- 
+
   // スキャン開始
   const startScan = async () => {
+    if (!html5QrcodeScanner) return;
     try {
       await html5QrcodeScanner.start(
         selectedCameraId,
@@ -63,9 +71,10 @@ export default function QrcodeReader({
       console.error('Error starting the scanner: ', error);
     }
   };
- 
+
   // スキャン停止
   const stopScan = async () => {
+    if (!html5QrcodeScanner) return;
     console.log('stop scan');
     try {
       await html5QrcodeScanner.stop();
@@ -74,26 +83,26 @@ export default function QrcodeReader({
       console.error('Error stopping the scanner: ', error);
     }
   };
- 
+
   // カメラ切り替え
   const switchCamera = (targetId: string) => {
     console.log(targetId);
     setSelectedCameraId(targetId);
   };
- 
+
   useEffect(() => {
     if (!onScanSuccess && !onScanFailure) {
       throw 'required callback.';
     }
- 
+
     const scanner = new Html5Qrcode(qrcodeRegionId);
     setHtml5QrcodeScanner(scanner);
- 
+
     return () => {
       scanner.clear();
     };
   }, []);
- 
+
   return (
     <div className='container mx-auto'>
       <div className='max-w-screen-lg' id={qrcodeRegionId} />
@@ -103,10 +112,10 @@ export default function QrcodeReader({
             name='camera'
             options={cameras}
             value={cameras.find(
-              (camera: any) => camera.value === selectedCameraId,
+              (camera) => camera.value === selectedCameraId,
             )}
             placeholder='カメラを選択'
-            onChange={async (camera) => await switchCamera(camera.value)}
+            onChange={async (camera) => camera && await switchCamera(camera.value)}
           />
         ) : (
           <p>カメラがありません</p>
