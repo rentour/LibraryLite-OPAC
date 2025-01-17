@@ -95,7 +95,7 @@ export default function Home() {
 
         <div className="grid grid-cols-2 gap-6 mb-8">
         <QrcodeReader
-        onScanSuccess={onNewScanResult}
+        onScanSuccess={(decodedText: string) => onNewScanResult({ text: decodedText })}
         onScanFailure={(error : string) => {
           console.log(error)
         }}
