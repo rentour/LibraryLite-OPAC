@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { BookOpen, BookX, Search, Clock, LibraryBig } from 'lucide-react';
 import Link from 'next/link';
+export const runtime = 'edge';
 
 export default function Home() {
   return (

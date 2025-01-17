@@ -5,6 +5,7 @@ import { BookOpen } from 'lucide-react';
 import { RotatingLines } from 'react-loader-spinner';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+export const runtime = 'edge';
 
 interface Users {
     user_number: string;

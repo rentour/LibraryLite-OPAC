@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+export const runtime = 'edge';
 
 
 export default function Home() {
@@ -33,11 +34,11 @@ export default function Home() {
     redirect("/borrow/confirm")
   }
 
-  const onNewScanResult = (result: any) => {
+  const onNewScanResult = (result: { text: string }) => {
     console.log('QRコードスキャン結果');
     console.log(result);
     setScannedTime(new Date());
-    setScannedResult(result);
+    setScannedResult(result.text);
     setisScanned(true);
 
     sessionStorage.setItem("org_id", org_id)

@@ -22,6 +22,7 @@ import {
 import { Html5Qrcode } from "html5-qrcode";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+export const runtime = 'edge';
 
 interface BookData {
   book_name: string;
@@ -118,7 +119,7 @@ export default function Home() {
           { deviceId: selectedCamera },
           { fps: 10, qrbox: { width: 250, height: 100 }, aspectRatio: 1.0 },
           handleScanSuccess,
-          handleScanError
+          (errorMessage: string) => handleScanError(new Error(errorMessage))
         );
       } catch (error) {
         console.error("Failed to start scanner:", error);
@@ -156,7 +157,7 @@ export default function Home() {
     }
   };
 
-  const handleScanError = (error: any) => {
+  const handleScanError = (error: Error) => {
     if (error?.message?.includes("No QR code found")) return;
     console.warn(`Scan error:`, error);
   };
@@ -213,8 +214,8 @@ export default function Home() {
 
       const newBookItem = { bookId, bookData: response.data[0] };
       setBookItems((prev) => [...prev, newBookItem]);
-    } catch (error) {
-      setError("書籍情報の取得に失敗しました。");
+    } catch (err) {
+      setError("書籍情報の取得に失敗しました:" + err);
       setShowErrorDialog(true);
     } finally {
       setLoading(false);
